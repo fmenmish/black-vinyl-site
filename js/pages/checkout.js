@@ -28,7 +28,7 @@ function renderCheckoutPanel(details) {
   const itemsHTML = details.map(d => `
     <div class="checkout-item">
       <span>${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)} (x ${escapeHTML(String(d.qty))})
-        <br><span class="checkout-item-id">Album ID: ${escapeHTML(d.album.id)}</span>
+        <br><span class="checkout-item-id"><span class="checkout-item-id-label">Album ID:</span> <span class="checkout-item-id-value">${escapeHTML(d.album.id)}</span></span>
       </span>
       <span>${formatPrice(d.lineTotal)}</span>
     </div>`).join('');
