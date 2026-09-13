@@ -1252,6 +1252,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/mahjong.jpg",
     "price": "30.00"
+  },
+  {
+    "id": "1000000143",
+    "name": "Mantras",
+    "band": "ASAVA",
+    "releaseDate": "2025-11-06",
+    "category": "metalcore",
+    "cover": "assets/images/mantras.jpg",
+    "price": "24.00"
   }
 ];
 
