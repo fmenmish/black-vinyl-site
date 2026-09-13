@@ -36,10 +36,10 @@ function renderCheckoutPanel(details) {
     <div class="checkout-item" id="checkout-item-${albumId}">
       <span id="checkout-item-details-${albumId}">
         <span id="checkout-item-name-${albumId}">${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)}</span>
-        <br><span class="checkout-item-qty" id="checkout-item-qty-${albumId}"><span class="checkout-item-qty-label" id="checkout-item-qty-label-${albumId}">Qty:</span> <span class="checkout-item-qty-value" id="checkout-item-qty-value-${albumId}">${escapeHTML(String(d.qty))}</span></span>
-        <br><span class="checkout-item-id" id="checkout-item-id-${albumId}"><span class="checkout-item-id-label" id="checkout-item-id-label-${albumId}">Album ID:</span> <span class="checkout-item-id-value" id="checkout-item-id-value-${albumId}">${albumId}</span></span>
+        <br><span class="checkout-item-qty" id="checkout-item-qty-${albumId}"><span class="checkout-item-qty-label" id="checkout-item-qty-label-${albumId}">Qty:</span> <span class="checkout-item-qty-value qty" id="checkout-item-qty-value-${albumId}">${escapeHTML(String(d.qty))}</span></span>
+        <br><span class="checkout-item-id" id="checkout-item-id-${albumId}"><span class="checkout-item-id-label" id="checkout-item-id-label-${albumId}">Album ID:</span> <span class="checkout-item-id-value id" id="checkout-item-id-value-${albumId}">${albumId}</span></span>
       </span>
-      <span id="checkout-item-price-${albumId}">${formatPrice(d.lineTotal)}</span>
+      <span class="price" id="checkout-item-price-${albumId}">${formatPrice(d.lineTotal)}</span>
     </div>`;
   }).join('');
 
