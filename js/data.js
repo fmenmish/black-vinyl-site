@@ -1243,6 +1243,15 @@ const ALBUMS = [
     "category": "punk",
     "cover": "assets/images/radical.png",
     "price": "18.90"
+  },
+  {
+    "id": "1000000142",
+    "name": "Mahjong",
+    "band": "ASAVA",
+    "releaseDate": "2026-08-28",
+    "category": "metalcore",
+    "cover": "assets/images/mahjong.jpg",
+    "price": "30.00"
   }
 ];
 
