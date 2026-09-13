@@ -34,6 +34,15 @@ function writeJSON(key, value) {
   }
 }
 
+// Like readJSON, but guarantees an array back even if someone has hand-edited
+// localStorage into something malformed — every list in this file (users,
+// cart lines, liked ids, orders) goes through this so a corrupted value can't
+// crash the site with a "find is not a function" error.
+function readArray(key) {
+  const value = readJSON(key, []);
+  return Array.isArray(value) ? value : [];
+}
+
 // ---- very light password obscuring (NOT real security, see file header) ----
 function obscurePassword(password) {
   let hash = 0;
@@ -45,9 +54,25 @@ function obscurePassword(password) {
 }
 
 // ============================== AUTH ========================================
+//
+// The site's "user database": every signed-up account is one row in the
+// array stored under the ecom_users localStorage key, keyed by (lowercased,
+// trimmed) email. getUsers()/saveUsers() are the only two functions that
+// touch that key directly — everything else in this section (register,
+// login, look up, update) goes through them, so this pair is the whole
+// read/write surface of the database.
+//
+// It's a *simple* database on purpose, matching the site's constraints: this
+// is a static GitHub Pages site with no server to talk to, so "shared across
+// devices" isn't possible without standing up a real backend. What's here
+// still behaves like a real user table for everything the site does within
+// one browser — unique-by-email accounts, persisted across reloads and tabs,
+// looked up by email at login. See the file-header note above for the one
+// real limitation: password storage here is not cryptographically secure,
+// because there is no server-side secret to hash against.
 
 function getUsers() {
-  return readJSON(LS_KEYS.users, []);
+  return readArray(LS_KEYS.users);
 }
 
 function saveUsers(users) {
@@ -65,6 +90,9 @@ function findUserByEmail(email) {
 
 function registerUser({ email, firstName, lastName, password }) {
   const norm = normalizeEmail(email);
+  firstName = String(firstName || '').trim();
+  lastName = String(lastName || '').trim();
+  password = String(password || '');
   if (!norm || !firstName || !lastName || !password) {
     return { ok: false, error: 'Please fill in every field.' };
   }
@@ -80,8 +108,8 @@ function registerUser({ email, firstName, lastName, password }) {
   const users = getUsers();
   users.push({
     email: norm,
-    firstName: firstName.trim(),
-    lastName: lastName.trim(),
+    firstName,
+    lastName,
     passwordHash: obscurePassword(password)
   });
   saveUsers(users);
@@ -119,13 +147,15 @@ function isLoggedIn() {
 function updateCurrentUser({ firstName, lastName }) {
   const current = getCurrentUser();
   if (!current) return { ok: false, error: 'Not logged in.' };
+  firstName = String(firstName || '').trim();
+  lastName = String(lastName || '').trim();
   if (!firstName || !lastName) {
     return { ok: false, error: 'First and last name cannot be empty.' };
   }
   const users = getUsers();
   const idx = users.findIndex(u => u.email === current.email);
   if (idx === -1) return { ok: false, error: 'User not found.' };
-  users[idx] = { ...users[idx], firstName: firstName.trim(), lastName: lastName.trim() };
+  users[idx] = { ...users[idx], firstName, lastName };
   saveUsers(users);
   return { ok: true, user: users[idx] };
 }
@@ -144,7 +174,7 @@ function requireLogin(returnToUrl) {
 function getCartRaw() {
   const user = getCurrentUser();
   if (!user) return [];
-  return readJSON(cartKey(user.email), []);
+  return readArray(cartKey(user.email));
 }
 
 function saveCartRaw(lines) {
@@ -228,7 +258,7 @@ function clearCart() {
 function getLikedIdsRaw() {
   const user = getCurrentUser();
   if (!user) return [];
-  return readJSON(likesKey(user.email), []);
+  return readArray(likesKey(user.email));
 }
 
 function saveLikedIds(ids) {
@@ -282,7 +312,7 @@ function generateOrderId() {
 function getOrdersRaw() {
   const user = getCurrentUser();
   if (!user) return [];
-  return readJSON(ordersKey(user.email), []);
+  return readArray(ordersKey(user.email));
 }
 
 function saveOrdersRaw(orders) {

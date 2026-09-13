@@ -43,11 +43,53 @@ search.html             Search results (?q=)
 404.html                Not-found page
 css/styles.css          Shared design system (dark theme)
 js/data.js              Album catalog + data helpers
-js/store.js             localStorage-backed auth/cart/likes/orders
+js/store.js             localStorage-backed auth/cart/likes/orders — the site's user database
 js/ui.js                Shared header/footer/card/carousel/toast rendering
 js/pages/*.js           Per-page logic
 assets/images/*         Album covers + hero banners
+scripts/add-album.js    CLI for adding a new album to the catalog (see below)
 ```
+
+## The user database
+
+There's no server, so "the database" is the array of accounts kept in the browser's `localStorage`
+under the `ecom_users` key, maintained entirely by `js/store.js` (`getUsers()` / `saveUsers()` are the
+only two functions that touch that key). Every signup adds one row:
+
+```json
+{ "email": "someone@example.com", "firstName": "...", "lastName": "...", "passwordHash": "..." }
+```
+
+Login looks a user up by (lowercased, trimmed) email and checks `passwordHash`. It's a real, working
+user table for everything the site does — unique accounts, persisted across reloads and tabs, edited
+from the My Account page — just scoped to one visitor's own browser rather than shared across devices,
+since GitHub Pages can't run a server to share it on. Passwords are obscured well enough to not be
+stored in plain text, but this is **not** cryptographic hashing — don't reuse a real password here.
+
+Each account also gets its own cart (`ecom_cart_<email>`), liked albums (`ecom_likes_<email>`), and
+order history (`ecom_orders_<email>`) in the same localStorage, so switching accounts in one browser
+switches all of that too.
+
+## Adding a new album
+
+`scripts/add-album.js` is a small Node CLI (no dependencies) that adds an album to the catalog: it
+slugifies the album name into a cover-image filename, copies your cover art into `assets/images/`,
+appends the album to `js/data.js`, and commits (and by default pushes) the change.
+
+```bash
+# interactive — it'll prompt you for anything you don't pass as a flag
+node scripts/add-album.js
+
+# or non-interactive, e.g. for scripting
+node scripts/add-album.js \
+  --name "Album Name" --band "Band Name" --release 2024-05-01 \
+  --category metal --price 19.99 --cover ./cover.jpg
+```
+
+Run `node scripts/add-album.js --help` for the full flag list (overriding the generated id/filename,
+`--dry-run` to preview without changing anything, `--no-commit` / `--no-push` to stop short of git, and
+`--force` to overwrite a same-named cover or add a likely-duplicate album anyway). It refuses to leave
+`js/data.js` broken — the new file is syntax-checked before it ever overwrites the real one.
 
 ## Running locally
 
