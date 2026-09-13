@@ -72,7 +72,7 @@ function renderHeader(activeKey) {
     <header class="site-header">
       <div class="container">
         <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">${ICONS.menu}</button>
-        <a href="index.html" class="brand">${ICONS.disc}<span>Black</span>Vinyl</a>
+        <a href="./" class="brand">${ICONS.disc}<span>Black</span>Vinyl</a>
         <ul class="nav-links" id="nav-links">${linksHTML}</ul>
         <div class="nav-search">
           <form id="nav-search-form" role="search">
