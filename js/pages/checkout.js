@@ -20,13 +20,24 @@ function renderCheckoutPanel(details) {
 
   const total = details.reduce((sum, d) => sum + d.lineTotal, 0);
 
+  // Generated once, shown to the user before they confirm, then handed to
+  // createOrderFromCart() below so the order actually gets saved under this
+  // exact same id rather than a different, freshly-generated one.
+  const pendingOrderId = generateOrderId();
+
   const itemsHTML = details.map(d => `
     <div class="checkout-item">
-      <span>${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)} (x ${escapeHTML(String(d.qty))})</span>
+      <span>${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)} (x ${escapeHTML(String(d.qty))})
+        <br><span class="checkout-item-id">Album ID: ${escapeHTML(d.album.id)}</span>
+      </span>
       <span>${formatPrice(d.lineTotal)}</span>
     </div>`).join('');
 
   panel.innerHTML = `
+    <div class="summary-row">
+      <span>Order ID</span>
+      <span class="order-id">${escapeHTML(pendingOrderId)}</span>
+    </div>
     ${itemsHTML}
     <div class="summary-row total">
       <span>Total</span>
@@ -39,7 +50,7 @@ function renderCheckoutPanel(details) {
   const confirmBtn = document.getElementById('confirm-purchase-btn');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      const res = createOrderFromCart();
+      const res = createOrderFromCart(pendingOrderId);
       if (res.ok) {
         location.href = 'orders.html?confirmed=' + encodeURIComponent(res.order.id);
       } else {

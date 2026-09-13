@@ -402,8 +402,11 @@ function getOrderById(orderId) {
 
 // Snapshots the current cart into a new order record, saves it, and empties
 // the cart. Returns { ok:false, error } if the cart is empty or nobody's
-// logged in.
-function createOrderFromCart() {
+// logged in. Pass a previously-generated id (see generateOrderId()) if the
+// caller already showed that id to the user before they confirmed — e.g.
+// the checkout page displays the order id up front, then must save the
+// order under that exact same id rather than a freshly-generated one.
+function createOrderFromCart(orderId) {
   if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const user = getCurrentUser();
   if (!user) return { ok: false, error: 'Log in to complete a purchase.' };
@@ -423,7 +426,7 @@ function createOrderFromCart() {
   const itemCount = items.reduce((s, i) => s + i.qty, 0);
 
   const order = {
-    id: generateOrderId(),
+    id: orderId || generateOrderId(),
     dateTime: new Date().toISOString(),
     items,
     totalAmount,
