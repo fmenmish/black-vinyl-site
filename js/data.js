@@ -1261,6 +1261,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/mantras.jpg",
     "price": "24.00"
+  },
+  {
+    "id": "1000000144",
+    "name": "Parasite Dream",
+    "band": "Prompts",
+    "releaseDate": "2026-06-16",
+    "category": "metalcore",
+    "cover": "assets/images/parasite_dream.jpg",
+    "price": "30.00"
   }
 ];
 
