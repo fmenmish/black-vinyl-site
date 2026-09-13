@@ -150,46 +150,54 @@ function renderFooter() {
 }
 
 // --------------------------- storage consent banner --------------------------
-
-const CONSENT_KEY = 'ecom_consent_ack';
-
-function hasConsentAck() {
-  try {
-    return localStorage.getItem(CONSENT_KEY) === '1';
-  } catch (e) {
-    return true; // storage isn't available at all — nothing to ask consent for
-  }
-}
+// Accept / opt-out decisions and the actual data wipe live in store.js
+// (getConsentStatus / hasConsentDecision / setConsentAccepted /
+// setConsentDeclined) since that's the site's persistence layer — this file
+// only renders the banner and wires those functions to its buttons.
 
 function initConsentBanner() {
-  if (hasConsentAck()) return;
+  if (hasConsentDecision()) return;
   showConsentBanner();
 }
 
 function showConsentBanner() {
   if (document.querySelector('.consent-banner')) return; // already open
+  const existing = getConsentStatus(); // null | 'accepted' | 'declined'
+
   const banner = document.createElement('div');
   banner.className = 'consent-banner';
   banner.innerHTML = `
     <div class="container">
+      ${existing ? `<button type="button" class="consent-close" id="consent-close-btn" aria-label="Close">${ICONS.close}</button>` : ''}
       <p class="consent-text">
         <strong>BlackVinyl uses your browser's local storage</strong> to remember your account,
-        cart, liked albums, and order history right on this device. It's required for the site to
-        work and nothing is sent to a server or shared with anyone.
+        cart, liked albums, and order history right on this device — nothing is sent to a server
+        or shared with anyone. Opting out clears any of that already saved on this device and
+        turns off accounts, cart, and likes.
+        ${existing ? `<br>Current setting: <strong>${existing === 'accepted' ? 'Accepted' : 'Opted out'}</strong>.` : ''}
       </p>
       <div class="consent-actions">
-        <button type="button" class="btn btn-primary" id="consent-ack-btn">Got it</button>
+        <button type="button" class="btn btn-outline" id="consent-optout-btn">Opt out</button>
+        <button type="button" class="btn btn-primary" id="consent-accept-btn">Accept</button>
       </div>
     </div>`;
   document.body.appendChild(banner);
-  document.getElementById('consent-ack-btn').addEventListener('click', () => {
-    try {
-      localStorage.setItem(CONSENT_KEY, '1');
-    } catch (e) {
-      // ignore — banner still dismisses for this page view even if it can't be remembered
-    }
+
+  document.getElementById('consent-accept-btn').addEventListener('click', () => {
+    setConsentAccepted();
     hideConsentBanner();
+    showToast('Storage accepted', 'success');
   });
+  document.getElementById('consent-optout-btn').addEventListener('click', () => {
+    setConsentDeclined();
+    hideConsentBanner();
+    // Declining logs you out and clears your cart/likes/orders — refresh the
+    // header so it stops showing a now-erased signed-in state.
+    renderHeader(document.body.dataset.activeNav || null);
+    showToast('Opted out — any saved data on this device was cleared');
+  });
+  const closeBtn = document.getElementById('consent-close-btn');
+  if (closeBtn) closeBtn.addEventListener('click', hideConsentBanner);
 }
 
 function hideConsentBanner() {

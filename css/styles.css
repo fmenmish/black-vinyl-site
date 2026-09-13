@@ -798,12 +798,31 @@ main { flex: 1 0 auto; }
   animation: consent-in .25s ease-out;
 }
 .consent-banner .container {
+  position: relative;
   padding: 16px 24px;
   display: flex;
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
 }
+.consent-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.consent-close:hover { background: var(--bg-card-hover); color: var(--text); }
+.consent-close svg { width: 16px; height: 16px; }
 .consent-text {
   flex: 1 1 420px;
   font-size: 13.5px;

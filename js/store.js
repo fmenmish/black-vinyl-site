@@ -7,7 +7,8 @@
 
 const LS_KEYS = {
   users: 'ecom_users',
-  session: 'ecom_session'
+  session: 'ecom_session',
+  consent: 'ecom_consent_status'
 };
 
 function cartKey(email) { return 'ecom_cart_' + email; }
@@ -53,6 +54,67 @@ function obscurePassword(password) {
   return 'h' + Math.abs(hash).toString(36) + str.length;
 }
 
+// ============================== CONSENT =====================================
+//
+// Whether the visitor has accepted or opted out of the local-storage-backed
+// database below. null = no decision yet (the banner in ui.js is still
+// showing). Opting out wipes every ecom_* key this site has ever written in
+// this browser (except the consent flag itself) and, from then on, every
+// function below that would create or change stored data refuses to run.
+
+function getConsentStatus() {
+  try {
+    const v = localStorage.getItem(LS_KEYS.consent);
+    return v === 'accepted' || v === 'declined' ? v : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function hasConsentDecision() {
+  return getConsentStatus() !== null;
+}
+
+function isStorageDeclined() {
+  return getConsentStatus() === 'declined';
+}
+
+// Removes every key this site has written to localStorage, except the
+// consent flag itself (that one's set right after calling this).
+function wipeAllSiteData() {
+  try {
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('ecom_') && key !== LS_KEYS.consent) toRemove.push(key);
+    }
+    toRemove.forEach(key => localStorage.removeItem(key));
+  } catch (e) {
+    console.warn('Failed to clear local data', e);
+  }
+}
+
+function setConsentAccepted() {
+  try {
+    localStorage.setItem(LS_KEYS.consent, 'accepted');
+  } catch (e) {
+    console.warn('Failed to save consent choice', e);
+  }
+}
+
+function setConsentDeclined() {
+  wipeAllSiteData();
+  try {
+    localStorage.setItem(LS_KEYS.consent, 'declined');
+  } catch (e) {
+    console.warn('Failed to save consent choice', e);
+  }
+}
+
+const STORAGE_DECLINED_ERROR =
+  "You've opted out of local storage, so accounts, carts, and liked albums are turned off. " +
+  'Use the "Privacy" link in the footer to switch back to "Accept" if you\'d like to use them.';
+
 // ============================== AUTH ========================================
 //
 // The site's "user database": every signed-up account is one row in the
@@ -89,6 +151,7 @@ function findUserByEmail(email) {
 }
 
 function registerUser({ email, firstName, lastName, password }) {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const norm = normalizeEmail(email);
   firstName = String(firstName || '').trim();
   lastName = String(lastName || '').trim();
@@ -118,6 +181,7 @@ function registerUser({ email, firstName, lastName, password }) {
 }
 
 function loginUser(email, password) {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const user = findUserByEmail(email);
   if (!user || user.passwordHash !== obscurePassword(password)) {
     return { ok: false, error: 'Incorrect email or password.' };
@@ -145,6 +209,7 @@ function isLoggedIn() {
 }
 
 function updateCurrentUser({ firstName, lastName }) {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const current = getCurrentUser();
   if (!current) return { ok: false, error: 'Not logged in.' };
   firstName = String(firstName || '').trim();
@@ -217,6 +282,7 @@ function isInCart(albumId) {
 }
 
 function addToCart(albumId, qty) {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const user = getCurrentUser();
   if (!user) return { ok: false, error: 'Log in to add albums to your cart.' };
   const addQty = Math.max(1, Math.floor(Number(qty)) || 1);
@@ -232,6 +298,7 @@ function addToCart(albumId, qty) {
 }
 
 function setCartQty(albumId, qty) {
+  if (isStorageDeclined()) return;
   const n = Math.floor(Number(qty)) || 0;
   let lines = getCartRaw();
   if (n <= 0) {
@@ -245,6 +312,7 @@ function setCartQty(albumId, qty) {
 }
 
 function removeFromCart(albumId) {
+  if (isStorageDeclined()) return;
   const lines = getCartRaw().filter(l => l.albumId !== String(albumId));
   saveCartRaw(lines);
 }
@@ -281,6 +349,7 @@ function isLiked(albumId) {
 
 // Returns the new liked state (true = now liked).
 function toggleLike(albumId) {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const user = getCurrentUser();
   if (!user) return { ok: false, error: 'Log in to like albums.' };
   const id = String(albumId);
@@ -298,6 +367,7 @@ function toggleLike(albumId) {
 }
 
 function removeLike(albumId) {
+  if (isStorageDeclined()) return;
   saveLikedIds(getLikedIdsRaw().filter(x => x !== String(albumId)));
 }
 
@@ -334,6 +404,7 @@ function getOrderById(orderId) {
 // the cart. Returns { ok:false, error } if the cart is empty or nobody's
 // logged in.
 function createOrderFromCart() {
+  if (isStorageDeclined()) return { ok: false, error: STORAGE_DECLINED_ERROR };
   const user = getCurrentUser();
   if (!user) return { ok: false, error: 'Log in to complete a purchase.' };
   const details = getCartWithDetails();
