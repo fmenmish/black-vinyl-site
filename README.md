@@ -30,7 +30,8 @@ browser's `localStorage`, scoped per logged-in user. That means:
 
 ```
 index.html            Home page (hero + genre carousels)
-login.html             Log in / create account
+login.html             Log in
+signup.html             Create account
 account.html            Edit your name
 cart.html               Shopping cart
 checkout.html           Purchase confirmation

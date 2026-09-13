@@ -10,25 +10,12 @@
     return;
   }
 
-  const tabs = [
-    { tab: document.getElementById('tab-login'), form: document.getElementById('form-login') },
-    { tab: document.getElementById('tab-signup'), form: document.getElementById('form-signup') }
-  ];
-
-  function activateTab(target) {
-    tabs.forEach(({ tab, form }) => {
-      const isActive = form.id === target;
-      tab.classList.toggle('active', isActive);
-      form.classList.toggle('active', isActive);
-    });
+  // Carry returnTo across to the signup page too, so "Create one" from here
+  // still lands back wherever requireLogin() originally sent them.
+  const signupLink = document.getElementById('signup-link');
+  if (signupLink && new URLSearchParams(location.search).get('returnTo')) {
+    signupLink.href = 'signup.html?returnTo=' + encodeURIComponent(returnTo);
   }
-
-  tabs.forEach(({ tab }) => {
-    tab.addEventListener('click', () => activateTab(tab.dataset.target));
-  });
-
-  // Default to the Log In tab.
-  activateTab('form-login');
 
   function showError(el, message) {
     el.textContent = message;
@@ -40,11 +27,11 @@
     el.classList.remove('show');
   }
 
-  // Mirror email/first/last name (not password) into a plain-text sibling
-  // div as the user types, same idea as the static fields on the account
-  // page — some resolvers read an element's text content rather than an
-  // <input>'s value property. Visually hidden; the real <input> is still
-  // what the user sees and types into.
+  // Mirror email (not password) into a plain-text sibling div as the user
+  // types, same idea as the static fields on the account page — some
+  // resolvers read an element's text content rather than an <input>'s value
+  // property. Visually hidden; the real <input> is still what the user sees
+  // and types into.
   //
   // Synced three ways so it stays correct no matter how the value gets set:
   // 'input'/'change' catch real typing and most form-filling tools that
@@ -64,9 +51,6 @@
   }
 
   mirrorInto('login-email', 'login-email-static');
-  mirrorInto('signup-first-name', 'signup-first-name-static');
-  mirrorInto('signup-last-name', 'signup-last-name-static');
-  mirrorInto('signup-email', 'signup-email-static');
 
   const loginForm = document.getElementById('form-login');
   const loginError = document.getElementById('login-error');
@@ -80,23 +64,6 @@
       location.href = returnTo;
     } else {
       showError(loginError, res.error);
-    }
-  });
-
-  const signupForm = document.getElementById('form-signup');
-  const signupError = document.getElementById('signup-error');
-  signupForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    hideError(signupError);
-    const firstName = document.getElementById('signup-first-name').value;
-    const lastName = document.getElementById('signup-last-name').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const res = registerUser({ email, firstName, lastName, password });
-    if (res.ok) {
-      location.href = returnTo;
-    } else {
-      showError(signupError, res.error);
     }
   });
 })();

@@ -12,7 +12,7 @@
       : 'A record store for people who like their music loud. Create an account to start building your collection.',
     actionsHTML: user
       ? `<a href="genre.html?c=metal" class="btn btn-primary">Browse Metal</a><a href="liked.html" class="btn btn-outline">Your Liked Albums</a>`
-      : `<a href="login.html" class="btn btn-primary">Create an Account</a><a href="genre.html?c=metal" class="btn btn-outline">Browse Albums</a>`
+      : `<a href="signup.html" class="btn btn-primary">Create an Account</a><a href="genre.html?c=metal" class="btn btn-outline">Browse Albums</a>`
   });
 
   document.getElementById('stat-albums').textContent = ALBUMS.length;
