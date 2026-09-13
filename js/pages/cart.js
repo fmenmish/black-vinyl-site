@@ -22,6 +22,7 @@
           <a href="band.html?b=${encodeURIComponent(album.band)}" class="cart-line-band">${escapeHTML(album.band)}</a>
           <div class="cart-line-price">${formatPrice(album.price)} each</div>
           <div class="cart-line-id"><span class="cart-line-id-label">Album ID:</span> <span class="cart-line-id-value">${escapeHTML(album.id)}</span></div>
+          <div class="cart-line-qty"><span class="cart-line-qty-label">Qty:</span> <span class="cart-line-qty-value">${escapeHTML(String(qty))}</span></div>
         </div>
         <div class="cart-line-controls">
           <div class="qty-stepper">
