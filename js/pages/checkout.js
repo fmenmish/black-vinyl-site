@@ -25,24 +25,33 @@ function renderCheckoutPanel(details) {
   // exact same id rather than a different, freshly-generated one.
   const pendingOrderId = generateOrderId();
 
-  const itemsHTML = details.map(d => `
-    <div class="checkout-item">
-      <span>${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)}
-        <br><span class="checkout-item-qty"><span class="checkout-item-qty-label">Qty:</span> <span class="checkout-item-qty-value">${escapeHTML(String(d.qty))}</span></span>
-        <br><span class="checkout-item-id"><span class="checkout-item-id-label">Album ID:</span> <span class="checkout-item-id-value">${escapeHTML(d.album.id)}</span></span>
+  // Every element below carries its own unique id (keyed by album id where
+  // there's one row per item) rather than relying on its position among
+  // siblings — so DevTools' "Copy JS path" for any of them resolves to a
+  // plain #id selector instead of falling back to :nth-child, which would
+  // silently break the moment an item is added, removed, or reordered.
+  const itemsHTML = details.map(d => {
+    const albumId = escapeHTML(d.album.id);
+    return `
+    <div class="checkout-item" id="checkout-item-${albumId}">
+      <span id="checkout-item-details-${albumId}">
+        <span id="checkout-item-name-${albumId}">${escapeHTML(d.album.name)} &mdash; ${escapeHTML(d.album.band)}</span>
+        <br><span class="checkout-item-qty" id="checkout-item-qty-${albumId}"><span class="checkout-item-qty-label" id="checkout-item-qty-label-${albumId}">Qty:</span> <span class="checkout-item-qty-value" id="checkout-item-qty-value-${albumId}">${escapeHTML(String(d.qty))}</span></span>
+        <br><span class="checkout-item-id" id="checkout-item-id-${albumId}"><span class="checkout-item-id-label" id="checkout-item-id-label-${albumId}">Album ID:</span> <span class="checkout-item-id-value" id="checkout-item-id-value-${albumId}">${albumId}</span></span>
       </span>
-      <span>${formatPrice(d.lineTotal)}</span>
-    </div>`).join('');
+      <span id="checkout-item-price-${albumId}">${formatPrice(d.lineTotal)}</span>
+    </div>`;
+  }).join('');
 
   panel.innerHTML = `
-    <div class="summary-row">
-      <span>Order ID</span>
-      <span class="order-id">${escapeHTML(pendingOrderId)}</span>
+    <div class="summary-row" id="checkout-order-id-row">
+      <span id="checkout-order-id-label">Order ID</span>
+      <span class="order-id" id="checkout-order-id-value">${escapeHTML(pendingOrderId)}</span>
     </div>
     ${itemsHTML}
-    <div class="summary-row total">
-      <span>Total</span>
-      <span>${formatPrice(total)}</span>
+    <div class="summary-row total" id="checkout-total-row">
+      <span id="checkout-total-label">Total</span>
+      <span id="checkout-total-value">${formatPrice(total)}</span>
     </div>
     <button type="button" class="btn btn-primary btn-block" id="confirm-purchase-btn" style="margin-top:8px">Confirm Purchase</button>
     <a href="cart.html" class="btn btn-outline btn-block" id="back-to-cart-link" style="margin-top:12px">Back to Cart</a>
