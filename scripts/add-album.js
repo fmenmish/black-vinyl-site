@@ -285,12 +285,17 @@ async function main() {
     }
 
     // --- write data.js (validate a temp copy first so we never leave a broken file on disk) ---
-    const marker = '\n];\n\nconst CATEGORIES';
-    const idx = src.indexOf(marker);
-    if (idx === -1) fail('Could not find the end of the ALBUMS array in data.js — has its format changed?');
+    // Tolerate either line ending: `git config core.autocrlf` can make a checkout on Windows use
+    // \r\n even though the file is authored/committed with \n.
+    const eol = src.includes('\r\n') ? '\r\n' : '\n';
+    const markerRe = /\r?\n\];\r?\n\r?\nconst CATEGORIES/;
+    const markerMatch = src.match(markerRe);
+    if (!markerMatch) fail('Could not find the end of the ALBUMS array in data.js — has its format changed?');
+    const idx = markerMatch.index;
 
-    const objText = JSON.stringify(newAlbum, null, 2).split('\n').map(l => '  ' + l).join('\n');
-    const newSrc = src.slice(0, idx) + ',\n' + objText + src.slice(idx);
+    const objText = JSON.stringify(newAlbum, null, 2)
+      .split('\n').map(l => '  ' + l).join(eol);
+    const newSrc = src.slice(0, idx) + ',' + eol + objText + src.slice(idx);
 
     const tmpFile = path.join(path.dirname(DATA_JS), 'data.tmp-check.js');
     fs.writeFileSync(tmpFile, newSrc, 'utf8');

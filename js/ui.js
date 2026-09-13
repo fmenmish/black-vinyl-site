@@ -40,6 +40,7 @@ function initHeaderFooter(activeKey) {
   renderHeader(activeKey);
   renderFooter();
   bindGlobalAlbumCardActions();
+  initConsentBanner();
 }
 
 function renderHeader(activeKey) {
@@ -138,9 +139,65 @@ function renderFooter() {
     <footer class="site-footer">
       <div class="container">
         <span>&copy; ${new Date().getFullYear()} BlackVinyl — a demo record store.</span>
-        <span>Metal &middot; Metalcore &middot; Punk &middot; Rock</span>
+        <span>Metal &middot; Metalcore &middot; Punk &middot; Rock &middot; <button type="button" id="privacy-link" class="link-btn">Privacy</button></span>
       </div>
     </footer>`;
+
+  const privacyLink = document.getElementById('privacy-link');
+  if (privacyLink) {
+    privacyLink.addEventListener('click', () => showConsentBanner());
+  }
+}
+
+// --------------------------- storage consent banner --------------------------
+
+const CONSENT_KEY = 'ecom_consent_ack';
+
+function hasConsentAck() {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === '1';
+  } catch (e) {
+    return true; // storage isn't available at all — nothing to ask consent for
+  }
+}
+
+function initConsentBanner() {
+  if (hasConsentAck()) return;
+  showConsentBanner();
+}
+
+function showConsentBanner() {
+  if (document.querySelector('.consent-banner')) return; // already open
+  const banner = document.createElement('div');
+  banner.className = 'consent-banner';
+  banner.innerHTML = `
+    <div class="container">
+      <p class="consent-text">
+        <strong>BlackVinyl uses your browser's local storage</strong> to remember your account,
+        cart, liked albums, and order history right on this device. It's required for the site to
+        work and nothing is sent to a server or shared with anyone.
+      </p>
+      <div class="consent-actions">
+        <button type="button" class="btn btn-primary" id="consent-ack-btn">Got it</button>
+      </div>
+    </div>`;
+  document.body.appendChild(banner);
+  document.getElementById('consent-ack-btn').addEventListener('click', () => {
+    try {
+      localStorage.setItem(CONSENT_KEY, '1');
+    } catch (e) {
+      // ignore — banner still dismisses for this page view even if it can't be remembered
+    }
+    hideConsentBanner();
+  });
+}
+
+function hideConsentBanner() {
+  const banner = document.querySelector('.consent-banner');
+  if (!banner) return;
+  banner.style.transition = 'transform .2s ease';
+  banner.style.transform = 'translateY(100%)';
+  setTimeout(() => banner.remove(), 200);
 }
 
 // -------------------------------- toasts ------------------------------------
