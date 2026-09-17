@@ -1297,6 +1297,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/post_human_nex_gen.png",
     "price": "25.00"
+  },
+  {
+    "id": "1000000148",
+    "name": "Hybrid Theory",
+    "band": "Linkin Park",
+    "releaseDate": "2000-10-24",
+    "category": "metalcore",
+    "cover": "assets/images/hybrid_theory.jpg",
+    "price": "17.99"
   }
 ];
 
