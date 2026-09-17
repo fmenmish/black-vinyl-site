@@ -1306,6 +1306,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/hybrid_theory.jpg",
     "price": "17.99"
+  },
+  {
+    "id": "1000000149",
+    "name": "From Zero",
+    "band": "Linkin Park",
+    "releaseDate": "2024-11-15",
+    "category": "metalcore",
+    "cover": "assets/images/from_zero.jpeg",
+    "price": "24.99"
   }
 ];
 
