@@ -1288,6 +1288,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/thats_the_spirit.jpg",
     "price": "22.50"
+  },
+  {
+    "id": "1000000147",
+    "name": "POST HUMAN: NeX GEn",
+    "band": "Bring Me The Horizon",
+    "releaseDate": "2024-05-24",
+    "category": "metalcore",
+    "cover": "assets/images/post_human_nex_gen.png",
+    "price": "25.00"
   }
 ];
 
