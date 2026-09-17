@@ -1279,6 +1279,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/sempiternal.jpg",
     "price": "19.99"
+  },
+  {
+    "id": "1000000146",
+    "name": "That's the Spirit",
+    "band": "Bring Me The Horizon",
+    "releaseDate": "2015-09-11",
+    "category": "metalcore",
+    "cover": "assets/images/thats_the_spirit.jpg",
+    "price": "22.50"
   }
 ];
 
