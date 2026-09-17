@@ -1270,6 +1270,15 @@ const ALBUMS = [
     "category": "metalcore",
     "cover": "assets/images/parasite_dream.jpg",
     "price": "30.00"
+  },
+  {
+    "id": "1000000145",
+    "name": "Sempiternal",
+    "band": "Bring Me The Horizon",
+    "releaseDate": "2013-04-01",
+    "category": "metalcore",
+    "cover": "assets/images/sempiternal.jpg",
+    "price": "19.99"
   }
 ];
 
