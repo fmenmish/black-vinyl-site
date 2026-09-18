@@ -273,6 +273,41 @@ function renderAlbumCardHTML(album, opts) {
     </div>`;
 }
 
+// Patches an existing .album-card's liked/cart-note state in place instead
+// of re-rendering it. Callers with a static album list (home page carousels,
+// where a like/cart change never adds or removes which albums are shown)
+// should use this on change rather than regenerating innerHTML -- replacing
+// the DOM nodes drops any click listeners bound to them, notably the ones
+// the Salesforce Interactions sitemap script attaches to add-to-cart/like.
+function syncAlbumCardState(cardEl) {
+  const albumId = cardEl.dataset.albumId;
+  const likeBtn = cardEl.querySelector('[data-role="like"]');
+  if (likeBtn) {
+    const liked = isLoggedIn() && isLiked(albumId);
+    likeBtn.classList.toggle('liked', liked);
+    likeBtn.setAttribute('aria-label', liked ? 'Remove from liked albums' : 'Add to liked albums');
+  }
+  const actions = cardEl.querySelector('.album-card-actions');
+  if (actions) {
+    const inCartQty = isLoggedIn() ? getCartQty(albumId) : 0;
+    let note = actions.querySelector('.already-in-cart-note');
+    if (inCartQty > 0) {
+      if (!note) {
+        note = document.createElement('div');
+        note.className = 'already-in-cart-note';
+        actions.appendChild(note);
+      }
+      note.textContent = `Already in the cart (qty ${inCartQty})`;
+    } else if (note) {
+      note.remove();
+    }
+  }
+}
+
+function syncAllAlbumCardStates(root) {
+  (root || document).querySelectorAll('.album-card[data-album-id]').forEach(syncAlbumCardState);
+}
+
 function renderAlbumGrid(container, albums, opts) {
   if (!container) return;
   if (!albums.length) {

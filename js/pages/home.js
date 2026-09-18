@@ -37,5 +37,5 @@
   }
 
   renderAllCarousels();
-  onAlbumCardsChanged(renderAllCarousels);
+  onAlbumCardsChanged(() => syncAllAlbumCardStates());
 })();
