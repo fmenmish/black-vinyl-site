@@ -37,5 +37,5 @@
   }
 
   renderGrid();
-  onAlbumCardsChanged(renderGrid);
+  onAlbumCardsChanged(() => syncAllAlbumCardStates());
 })();
